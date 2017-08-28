@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es2015",
+        "jsx": "react",
+        "strict": true,
+        "importHelpers": true,
+        "noEmitHelpers": true,
+        "noImplicitAny": true,
+        "experimentalDecorators": true,
+        "sourceMap": true,
+        "declaration": true,
+        "preserveConstEnums": true,
+        "noImplicitReturns": true,
+        "noUnusedLocals": true,
+        "noImplicitThis": true,
+        "noUnusedParameters": true,
+        "noLib": false,
+        "outDir": "../../out",
+        "rootDir": "../"
+    },
+    "files": [
+        "index.ts"
+    ]
+}
