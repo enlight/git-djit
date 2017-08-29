@@ -5,6 +5,6 @@ import * as React from 'react';
 
 export class AppWindow extends React.Component {
   render() {
-    return (<div>App Window</div>);
+    return <div>App Window</div>;
   }
 }

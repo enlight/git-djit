@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        ".compilerc": "json",
+        ".prettierrc": "json"
+    },
+    "tslint.enable": true,
+    "tslint.autoFixOnSave": true
+}

@@ -3,18 +3,17 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { AppContainer } from './react-hot-loader';
+
 import { AppWindow as AppWindowComponent } from './app-window';
+import { AppContainer } from './react-hot-loader';
 
 const render = () => {
   const AppWindow: typeof AppWindowComponent = require('./app-window').AppWindow;
   ReactDOM.render(
-    React.createElement(AppContainer, {},
-      React.createElement(AppWindow)
-    ),
+    React.createElement(AppContainer, {}, React.createElement(AppWindow)),
     document.getElementById('AppWindowContainer')
   );
-}
+};
 
 render();
 

@@ -13,15 +13,12 @@ if (isDevMode) {
 }
 
 const createWindow = async () => {
-  appWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-  });
+  appWindow = new BrowserWindow({ width: 800, height: 600 });
 
   appWindow.loadURL(`file://${__dirname}/../../static/index.html`);
 
   if (isDevMode) {
-    //await installExtension(REACT_DEVELOPER_TOOLS);
+    // await installExtension(REACT_DEVELOPER_TOOLS);
     appWindow.webContents.openDevTools();
   }
 
