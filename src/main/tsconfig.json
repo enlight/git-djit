@@ -13,7 +13,7 @@
         "noImplicitThis": true,
         "noUnusedParameters": true,
         "sourceMap": true,
-        "declaration": true,
+        "declaration": false,
         "noLib": false,
         "outDir": "../../out",
         "rootDir": "../"

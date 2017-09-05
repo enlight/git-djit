@@ -9,7 +9,7 @@
         "noImplicitAny": true,
         "experimentalDecorators": true,
         "sourceMap": true,
-        "declaration": true,
+        "declaration": false,
         "preserveConstEnums": true,
         "noImplicitReturns": true,
         "noUnusedLocals": true,
