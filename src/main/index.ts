@@ -4,7 +4,9 @@
 import { app, BrowserWindow } from 'electron';
 import { enableLiveReload } from 'electron-compile';
 
+import BrowserSystemDialogService from './system-dialog-service';
 let appWindow: Electron.BrowserWindow | null = null;
+let systemDialogService: BrowserSystemDialogService | null = null;
 
 const isDevMode = process.execPath.match(/[\\/]electron/);
 
@@ -14,6 +16,7 @@ if (isDevMode) {
 
 const createWindow = async () => {
   appWindow = new BrowserWindow({ width: 800, height: 600 });
+  systemDialogService = new BrowserSystemDialogService();
 
   appWindow.loadURL(`file://${__dirname}/../../static/index.html`);
 
