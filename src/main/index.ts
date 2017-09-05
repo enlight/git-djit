@@ -5,7 +5,10 @@ import { app, BrowserWindow } from 'electron';
 import { enableLiveReload } from 'electron-compile';
 
 import BrowserSystemDialogService from './system-dialog-service';
+import WindowMenuService from './window-menu-service';
+
 let appWindow: Electron.BrowserWindow | null = null;
+let windowMenuService: WindowMenuService | null = null;
 let systemDialogService: BrowserSystemDialogService | null = null;
 
 const isDevMode = process.execPath.match(/[\\/]electron/);
@@ -16,8 +19,10 @@ if (isDevMode) {
 
 const createWindow = async () => {
   appWindow = new BrowserWindow({ width: 800, height: 600 });
+  windowMenuService = new WindowMenuService(app.getName());
   systemDialogService = new BrowserSystemDialogService();
 
+  windowMenuService.setMenuForWindow(appWindow);
   appWindow.loadURL(`file://${__dirname}/../../static/index.html`);
 
   if (isDevMode) {
