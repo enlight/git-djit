@@ -20,6 +20,7 @@
         "rootDir": "../"
     },
     "files": [
-        "index.ts"
+        "index.ts",
+        "repository-list-view.tsx"
     ]
 }
