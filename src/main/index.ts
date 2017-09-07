@@ -18,7 +18,7 @@ if (isDevMode) {
 }
 
 const createWindow = async () => {
-  appWindow = new BrowserWindow({ width: 800, height: 600 });
+  appWindow = new BrowserWindow({ width: 800, height: 600, backgroundColor: '#293742' });
   windowMenuService = new WindowMenuService(app.getName());
   systemDialogService = new BrowserSystemDialogService();
 

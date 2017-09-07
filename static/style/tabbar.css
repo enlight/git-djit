@@ -6,12 +6,15 @@
 | The full license is in the file LICENSE, distributed with this software.
 |----------------------------------------------------------------------------*/
 
-
+/*
+  These commented out rules have been redefined elsewhere with TypeStyle or eliminated,
+  they're kept here for reference for the time being.
+*/
+/*
 .p-TabBar {
   min-height: 24px;
   max-height: 24px;
 }
-
 
 .p-TabBar-content {
   min-width: 0;
@@ -56,7 +59,7 @@
   max-height: 23px;
   transform: translateY(1px);
 }
-
+*/
 
 .p-TabBar-tabIcon,
 .p-TabBar-tabLabel,

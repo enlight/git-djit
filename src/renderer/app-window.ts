@@ -1,8 +1,10 @@
 // Copyright (c) 2017 Vadim Macagon
 // MIT License, see LICENSE file for full terms.
 
-import { DockPanel, SplitPanel, Widget } from '@phosphor/widgets';
+import { Classes as BlueprintClasses } from '@blueprintjs/core';
+import { SplitPanel, Widget } from '@phosphor/widgets';
 import { ipcRenderer } from 'electron';
+import { forceRenderStyles, style } from 'typestyle';
 
 import { IpcChannel } from '../common/ipc';
 import MenuItemId from '../common/menu-item-ids';
@@ -10,11 +12,15 @@ import { showAddLocalRepositoryDialog } from './add-local-repository-dialog';
 import ReactWidget from './react-widget';
 import { AppDatabase } from './storage/app-database';
 import { IRepositoryStore, RepositoryStore } from './storage/repository-store';
+import { injectCssRules } from './style';
+import StyledDockPanel from './styled-dock-panel';
 import RendererSystemDialogService from './system-dialog-service';
 
 class RepositoryListWidget extends ReactWidget {
   constructor(repositoryStore: IRepositoryStore) {
     super(require('./repository-list-view').default, { store: repositoryStore });
+    this.addClass(BlueprintClasses.TAB_PANEL);
+    this.node.setAttribute('role', 'tabpanel');
     this.id = 'repoList';
     this.title.label = 'Repositories';
   }
@@ -64,18 +70,44 @@ export class AppWindow {
     // const historyList = new HistoryListWidget();
     this.rootPanel = new SplitPanel({ orientation: 'horizontal' });
     this.rootPanel.id = 'root';
+    this.rootPanel.addClass(
+      style({
+        display: 'flex',
+        flex: '1 1 auto',
+        flexDirection: 'row'
+      })
+    );
 
-    const leftDockPanel = new DockPanel();
+    const leftDockPanel = new StyledDockPanel();
     leftDockPanel.addWidget(repoList);
 
-    const rightDockPanel = new DockPanel();
+    const rightDockPanel = new StyledDockPanel();
     // rightDockPanel.addWidget(historyList /*, { mode: 'split-right', ref: repoList }*/);
 
+    SplitPanel.setStretch(leftDockPanel, 1);
+    SplitPanel.setStretch(rightDockPanel, 4);
     this.rootPanel.addWidget(leftDockPanel);
     this.rootPanel.addWidget(rightDockPanel);
-    this.rootPanel.setRelativeSizes([1, 4]);
+    // NOTE: Phosphor docs don't explain the difference between setStretch() and
+    // setRelativeSizes(), but from my experiments it appears setStretch() is more
+    // reliable. While setRelativeSizes() initially resizes things as expected the
+    // relative sizes aren't reliably enforced when the window is resized. So, it
+    // would appear setRelativeSizes() is designed to achieve an immediate one off
+    // effect.
+    // this.rootPanel.setRelativeSizes([1, 4]);
 
     window.addEventListener('resize', this.onWindowResize);
-    Widget.attach(this.rootPanel, document.getElementById('appWindowContainer')!);
+
+    injectCssRules();
+    // Force TypeStyle to update styles immediately, otherwise the Phosphor layout
+    // gets screwed up for some reason.
+    forceRenderStyles();
+
+    const appWindowContainer = document.getElementById('appWindowContainer');
+    if (appWindowContainer) {
+      // Enable the Dark Blueprint theme
+      appWindowContainer.classList.add(BlueprintClasses.DARK);
+      Widget.attach(this.rootPanel, appWindowContainer);
+    }
   }
 }

@@ -5,8 +5,25 @@ import { Message } from '@phosphor/messaging';
 import { Widget } from '@phosphor/widgets';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { style } from 'typestyle';
 
 import { AppContainer } from './react-hot-loader';
+import { appBackgroundColor } from './style';
+
+const cssClass = style({
+  backgroundColor: appBackgroundColor,
+  display: 'flex',
+  flexDirection: 'column',
+  minHeight: '50px',
+  minWidth: '50px',
+  padding: '4px',
+  $nest: {
+    '&>div': {
+      flex: '1 1 auto',
+      overflow: 'auto'
+    }
+  }
+});
 
 /**
  * PhosphorJS widget that wraps a React component.
@@ -14,7 +31,7 @@ import { AppContainer } from './react-hot-loader';
 export default class ReactWidget<TProps = {}> extends Widget {
   constructor(private component: React.ComponentClass<any>, private props?: TProps) {
     super();
-    this.addClass('content');
+    this.addClass(cssClass);
   }
 
   protected onAfterAttach(_: Message): void {

@@ -1,4 +1,3 @@
-@import './content.css';
 @import './dockpanel.css';
 @import './tabbar.css';
 
@@ -7,18 +6,6 @@ body {
   height: 100vh;
   margin: 0;
   overflow: hidden;
-  background-color: rgba(0,0,0,0);
   display: flex;
   flex-direction: column;
-}
-
-#root {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: row;
-}
-
-#repoList {
-  min-width: 300px;
-  min-height: 300px;
 }
