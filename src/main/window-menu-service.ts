@@ -29,7 +29,6 @@ export default class WindowMenuService {
 
     const macOS = process.platform === 'darwin';
 
-    /* tslint:disable:object-literal-sort-keys */
     if (macOS) {
       template.push({
         label: this.appName,
