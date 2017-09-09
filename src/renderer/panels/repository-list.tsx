@@ -6,10 +6,10 @@ import { computed } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import ReactWidget from './react-widget';
-import { IAppStore } from './storage/app-store';
-import { IRepositoryStore } from './storage/repository-store';
-import { IUiStore } from './storage/ui-store';
+import ReactWidget from '../react-widget';
+import { IAppStore } from '../storage/app-store';
+import { IRepositoryStore } from '../storage/repository-store';
+import { IUiStore } from '../storage/ui-store';
 
 export interface IRepositoryListProps {
   repositoryStore: IRepositoryStore;

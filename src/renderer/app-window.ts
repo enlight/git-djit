@@ -8,8 +8,8 @@ import { forceRenderStyles, style } from 'typestyle';
 
 import { IpcChannel } from '../common/ipc';
 import MenuItemId from '../common/menu-item-ids';
-import { showAddLocalRepositoryDialog } from './add-local-repository-dialog';
-import { RepositoryListWidget } from './repository-list-view';
+import { showAddLocalRepositoryDialog } from './dialogs/add-local-repository-dialog';
+import { RepositoryListWidget } from './panels/repository-list';
 import { AppDatabase } from './storage/app-database';
 import { AppStore, IAppStore } from './storage/app-store';
 import { injectCssRules } from './style';

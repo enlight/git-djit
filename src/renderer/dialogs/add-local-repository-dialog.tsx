@@ -8,10 +8,10 @@ import * as path from 'path';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import FilePathInputView, { FilePathInput } from './file-path-input';
-import { IRepositoryStore } from './storage/repository-store';
-import { IUiStore } from './storage/ui-store';
-import RendererSystemDialogService from './system-dialog-service';
+import FilePathInputView, { FilePathInput } from '../components/file-path-input';
+import { IRepositoryStore } from '../storage/repository-store';
+import { IUiStore } from '../storage/ui-store';
+import RendererSystemDialogService from '../system-dialog-service';
 
 interface IAddLocalRepositoryDialogProps {
   model: AddLocalRepositoryDialog;

@@ -21,7 +21,6 @@
     },
     "files": [
         "main/index.ts",
-        "renderer/index.ts",
-        "renderer/repository-list-view.tsx"
+        "renderer/index.ts"
     ]
 }
