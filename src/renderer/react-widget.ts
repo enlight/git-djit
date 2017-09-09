@@ -29,7 +29,7 @@ const cssClass = style({
  * PhosphorJS widget that wraps a React component.
  */
 export default class ReactWidget<TProps = {}> extends Widget {
-  constructor(private component: React.ComponentClass<any>, private props?: TProps) {
+  constructor(private component: React.ComponentClass<TProps>, private props?: TProps) {
     super();
     this.addClass(cssClass);
   }
