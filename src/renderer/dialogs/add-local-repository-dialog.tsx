@@ -9,6 +9,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
 import FilePathInputView, { FilePathInput } from '../components/file-path-input';
+import { getTopLevelWorkingDirectory } from '../git';
 import { IRepositoryStore } from '../storage/repository-store';
 import { IUiStore } from '../storage/ui-store';
 import RendererSystemDialogService from '../system-dialog-service';
@@ -60,16 +61,24 @@ class AddLocalRepositoryDialog {
   }
 
   @action.bound
-  onOK() {
-    // TODO: normalize the repository path
-    const dirPath = this.repositoryInput.filePath;
+  async onOK() {
+    const dirPath = path.resolve(this.repositoryInput.filePath);
     // check if there's already a repository model with the same path in the store
-    const repository = this.repositoryStore.repositories.find(
-      repo => repo.localPath === this.repositoryInput.filePath
-    );
+    const repository = this.repositoryStore.repositories.find(repo => repo.localPath === dirPath);
     if (!repository) {
-      // TODO: validate repository path, show error if validation fails and prevent dialog closure
-      this.repositoryStore.addRepository({ localPath: dirPath, name: path.basename(dirPath) });
+      // TODO: show error if validation fails, even better: validate before enabling the OK button
+      let gitDir = await getTopLevelWorkingDirectory(dirPath);
+      if (gitDir === null) {
+        return;
+      }
+      gitDir = path.normalize(gitDir);
+      if (dirPath !== gitDir) {
+        return;
+      }
+      await this.repositoryStore.addRepository({
+        localPath: dirPath,
+        name: path.basename(dirPath)
+      });
     }
     this.isOpen = false;
     this.uiStore.selectRepository(repository);

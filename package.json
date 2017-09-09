@@ -62,6 +62,7 @@
     "@blueprintjs/core": "^1.27.0",
     "@phosphor/widgets": "^1.5.0",
     "dexie": "^2.0.0-beta.11",
+    "dugite": "^1.40.0",
     "electron-compile": "^6.4.1",
     "mobx": "^3.2.2",
     "mobx-react": "^4.2.2",
