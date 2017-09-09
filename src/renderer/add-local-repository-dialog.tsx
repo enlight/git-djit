@@ -10,6 +10,7 @@ import * as ReactDOM from 'react-dom';
 
 import FilePathInputView, { FilePathInput } from './file-path-input';
 import { IRepositoryStore } from './storage/repository-store';
+import { IUiStore } from './storage/ui-store';
 import RendererSystemDialogService from './system-dialog-service';
 
 interface IAddLocalRepositoryDialogProps {
@@ -45,11 +46,17 @@ class AddLocalRepositoryDialog {
   @observable isOpen = true;
   @observable repositoryInput: FilePathInput;
 
-  constructor(
-    private repositoryStore: IRepositoryStore,
-    dialogService: RendererSystemDialogService
-  ) {
-    this.repositoryInput = new FilePathInput(dialogService, { label: 'Local Path' });
+  private repositoryStore: IRepositoryStore;
+  private uiStore: IUiStore;
+
+  constructor(args: {
+    repositoryStore: IRepositoryStore;
+    uiStore: IUiStore;
+    systemDialogService: RendererSystemDialogService;
+  }) {
+    this.repositoryStore = args.repositoryStore;
+    this.uiStore = args.uiStore;
+    this.repositoryInput = new FilePathInput(args.systemDialogService, { label: 'Local Path' });
   }
 
   @action.bound
@@ -57,16 +64,15 @@ class AddLocalRepositoryDialog {
     // TODO: normalize the repository path
     const dirPath = this.repositoryInput.filePath;
     // check if there's already a repository model with the same path in the store
-    const existingRepo = this.repositoryStore.repositories.find(
+    const repository = this.repositoryStore.repositories.find(
       repo => repo.localPath === this.repositoryInput.filePath
     );
-    if (existingRepo) {
-      // TODO: select/highlight the repo
-    } else {
+    if (!repository) {
       // TODO: validate repository path, show error if validation fails and prevent dialog closure
       this.repositoryStore.addRepository({ localPath: dirPath, name: path.basename(dirPath) });
     }
     this.isOpen = false;
+    this.uiStore.selectRepository(repository);
   }
 
   @action.bound
@@ -75,11 +81,12 @@ class AddLocalRepositoryDialog {
   }
 }
 
-export function showAddLocalRepositoryDialog(
-  repositoryStore: IRepositoryStore,
-  dialogService: RendererSystemDialogService
-) {
-  const dialog = new AddLocalRepositoryDialog(repositoryStore, dialogService);
+export function showAddLocalRepositoryDialog(args: {
+  repositoryStore: IRepositoryStore;
+  uiStore: IUiStore;
+  systemDialogService: RendererSystemDialogService;
+}) {
+  const dialog = new AddLocalRepositoryDialog(args);
   ReactDOM.render(
     <AddLocalRepositoryDialogObserver model={dialog} />,
     document.getElementById('dialogContainer')

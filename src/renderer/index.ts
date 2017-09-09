@@ -7,6 +7,7 @@ let appWindow: AppWindow | null = null;
 
 function load(): void {
   appWindow = new AppWindow();
+  appWindow.initialize();
 }
 
 window.onload = load;

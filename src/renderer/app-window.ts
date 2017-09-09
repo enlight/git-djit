@@ -9,34 +9,20 @@ import { forceRenderStyles, style } from 'typestyle';
 import { IpcChannel } from '../common/ipc';
 import MenuItemId from '../common/menu-item-ids';
 import { showAddLocalRepositoryDialog } from './add-local-repository-dialog';
-import ReactWidget from './react-widget';
+import { RepositoryListWidget } from './repository-list-view';
 import { AppDatabase } from './storage/app-database';
-import { IRepositoryStore, RepositoryStore } from './storage/repository-store';
+import { AppStore, IAppStore } from './storage/app-store';
 import { injectCssRules } from './style';
 import StyledDockPanel from './styled-dock-panel';
 import RendererSystemDialogService from './system-dialog-service';
 
-class RepositoryListWidget extends ReactWidget {
-  constructor(repositoryStore: IRepositoryStore) {
-    super(require('./repository-list-view').default, { store: repositoryStore });
-    this.addClass(BlueprintClasses.TAB_PANEL);
-    this.node.setAttribute('role', 'tabpanel');
-    this.id = 'repoList';
-    this.title.label = 'Repositories';
-  }
-}
-
 export class AppWindow {
-  private repositoryStore: IRepositoryStore;
+  private appStore: IAppStore;
   private systemDialogService = new RendererSystemDialogService();
   private rootPanel: SplitPanel | null = null;
 
   constructor() {
     ipcRenderer.on(IpcChannel.WindowMenu, this.handleWindowMenuEvent);
-    const db = new AppDatabase('AppDatabase');
-    this.repositoryStore = RepositoryStore.create({ repositories: [] }, { db });
-    this.createDefaultLayout();
-    this.repositoryStore.load();
   }
 
   dispose() {
@@ -49,6 +35,13 @@ export class AppWindow {
     }
   }
 
+  async initialize() {
+    const db = new AppDatabase('AppDatabase');
+    this.appStore = AppStore.create({}, { db });
+    await this.appStore.load();
+    this.createDefaultLayout();
+  }
+
   private onWindowResize = () => {
     if (this.rootPanel) {
       this.rootPanel.update();
@@ -58,7 +51,11 @@ export class AppWindow {
   private handleWindowMenuEvent = (_: Electron.IpcMessageEvent, menuItemId: string) => {
     switch (menuItemId) {
       case MenuItemId.AddLocalRepository:
-        showAddLocalRepositoryDialog(this.repositoryStore, this.systemDialogService);
+        showAddLocalRepositoryDialog({
+          repositoryStore: this.appStore.repositories!,
+          uiStore: this.appStore.ui!,
+          systemDialogService: this.systemDialogService
+        });
         break;
       default:
         throw new Error(`No handler found for menu item '${menuItemId}'`);
@@ -66,7 +63,7 @@ export class AppWindow {
   };
 
   private createDefaultLayout() {
-    const repoList = new RepositoryListWidget(this.repositoryStore);
+    const repoList = new RepositoryListWidget(this.appStore);
     // const historyList = new HistoryListWidget();
     this.rootPanel = new SplitPanel({ orientation: 'horizontal' });
     this.rootPanel.id = 'root';
