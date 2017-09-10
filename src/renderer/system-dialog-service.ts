@@ -18,6 +18,11 @@ import {
  * @see BrowserSystemDialogService
  */
 export default class RendererSystemDialogService {
+  /**
+   * Open a dialog to let the user select a single directory.
+   *
+   * @return A directory path, or `null` if the user cancelled the operation.
+   */
   promptForSingleDirectory(): Promise<string | null> {
     return new Promise(resolve => {
       ipcRenderer.once(
