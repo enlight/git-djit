@@ -4,6 +4,7 @@
 import { app, BrowserWindow } from 'electron';
 import { enableLiveReload } from 'electron-compile';
 
+import setupDevMode from './dev-mode-bootstrap';
 import BrowserSystemDialogService from './system-dialog-service';
 import WindowMenuService from './window-menu-service';
 
@@ -14,21 +15,28 @@ let systemDialogService: BrowserSystemDialogService | null = null;
 const isDevMode = process.execPath.match(/[\\/]electron/);
 
 if (isDevMode) {
+  // FIXME: Move this to dev-mode-bootstrap.ts, on first try I started seeing
+  //        "Sending message to WebContents with unknown ID 2" in the console after quitting the app,
+  //        need to investigate further.
   enableLiveReload({ strategy: 'react-hmr' });
 }
 
 const createWindow = async () => {
+  if (isDevMode) {
+    const bootstrapDevMode: typeof setupDevMode = require('./dev-mode-bootstrap').default;
+    await bootstrapDevMode();
+  }
+
   appWindow = new BrowserWindow({ width: 800, height: 600, backgroundColor: '#293742' });
   windowMenuService = new WindowMenuService(app.getName());
   systemDialogService = new BrowserSystemDialogService();
 
-  windowMenuService.setMenuForWindow(appWindow);
-  appWindow.loadURL(`file://${__dirname}/../../static/index.html`);
-
   if (isDevMode) {
-    // await installExtension(REACT_DEVELOPER_TOOLS);
     appWindow.webContents.openDevTools();
   }
+
+  windowMenuService.setMenuForWindow(appWindow);
+  appWindow.loadURL(`file://${__dirname}/../../static/index.html`);
 
   appWindow.on('closed', () => {
     appWindow = null;

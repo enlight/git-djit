@@ -76,11 +76,13 @@
     "typestyle": "^1.4.0"
   },
   "devDependencies": {
+    "@types/electron-devtools-installer": "^2.0.2",
     "@types/react": "^16.0.5",
     "@types/react-addons-css-transition-group": "^15.0.3",
     "@types/react-dom": "^15.5.4",
     "@types/react-hot-loader": "^3.0.4",
     "electron": "1.7.6",
+    "electron-devtools-installer": "^2.2.0",
     "electron-forge": "^3.2.0",
     "electron-prebuilt-compile": "1.7.6",
     "prettier": "1.6.0",
