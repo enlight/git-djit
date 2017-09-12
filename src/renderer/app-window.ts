@@ -16,6 +16,8 @@ import { injectCssRules } from './style';
 import StyledDockPanel from './styled-dock-panel';
 import RendererSystemDialogService from './system-dialog-service';
 
+const isDevMode = process.execPath.match(/[\\/]electron/);
+
 export class AppWindow {
   private appStore: IAppStore;
   private systemDialogService = new RendererSystemDialogService();
@@ -36,6 +38,9 @@ export class AppWindow {
   }
 
   async initialize() {
+    if (isDevMode) {
+      require('./dev-mode-bootstrap').default();
+    }
     const db = new AppDatabase('AppDatabase');
     this.appStore = AppStore.create({}, { db });
     await this.appStore.load();
