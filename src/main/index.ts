@@ -18,6 +18,8 @@ if (isDevMode) {
   // FIXME: Move this to dev-mode-bootstrap.ts, on first try I started seeing
   //        "Sending message to WebContents with unknown ID 2" in the console after quitting the app,
   //        need to investigate further.
+  //        Upon further investigation I suspect the message is emitted because React/Devtron
+  //        DevTools aren't hooked into the HMR.
   enableLiveReload({ strategy: 'react-hmr' });
 }
 

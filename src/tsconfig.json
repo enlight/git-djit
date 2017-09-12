@@ -20,6 +20,7 @@
         "rootDir": "./"
     },
     "files": [
+        "main/devtron.d.ts",
         "main/index.ts",
         "renderer/index.ts"
     ]

@@ -81,6 +81,7 @@
     "@types/react-addons-css-transition-group": "^15.0.3",
     "@types/react-dom": "^15.5.4",
     "@types/react-hot-loader": "^3.0.4",
+    "devtron": "^1.4.0",
     "electron": "1.7.6",
     "electron-devtools-installer": "^2.2.0",
     "electron-forge": "^3.2.0",

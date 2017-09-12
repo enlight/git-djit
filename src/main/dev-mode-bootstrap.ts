@@ -1,6 +1,7 @@
 // Copyright (c) 2017 Vadim Macagon
 // MIT License, see LICENSE file for full terms.
 
+import { install as installDevtron } from 'devtron';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 
 /**
@@ -11,4 +12,5 @@ import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-insta
  */
 export default async function setupDevMode(): Promise<void> {
   await installExtension(REACT_DEVELOPER_TOOLS);
+  installDevtron();
 }
