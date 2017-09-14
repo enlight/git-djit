@@ -8,7 +8,7 @@ import {
   IShowOpenDialogRequest,
   IShowOpenDialogResponse,
   OpenDialogPathKind
-} from '../common/ipc';
+} from '../../common/ipc';
 
 /**
  * Singleton that provides access to the built-in `dialog` module via async IPC.

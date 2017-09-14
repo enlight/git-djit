@@ -3,8 +3,8 @@
 
 import { ipcRenderer } from 'electron';
 
-import { IContextMenuActionRequest, IpcChannel, IShowContextMenuRequest } from '../common/ipc';
-import { ContextMenu } from './context-menu';
+import { IContextMenuActionRequest, IpcChannel, IShowContextMenuRequest } from '../../common/ipc';
+import { ContextMenu } from '../context-menu';
 
 /**
  * Works in conjunction with BrowserContextMenuService to display native context menus.

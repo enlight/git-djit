@@ -7,8 +7,8 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { ContextMenu } from '../context-menu';
-import RendererContextMenuService from '../context-menu-service';
 import ReactWidget from '../react-widget';
+import RendererContextMenuService from '../services/context-menu-service';
 import { IAppStore } from '../storage/app-store';
 import { IRepositoryStore } from '../storage/repository-store';
 import { IUiStore } from '../storage/ui-store';

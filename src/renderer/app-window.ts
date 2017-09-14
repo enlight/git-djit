@@ -8,14 +8,14 @@ import { forceRenderStyles, style } from 'typestyle';
 
 import { IpcChannel } from '../common/ipc';
 import MenuItemId from '../common/menu-item-ids';
-import RendererContextMenuService from './context-menu-service';
 import { showAddLocalRepositoryDialog } from './dialogs/add-local-repository-dialog';
 import { RepositoryListWidget } from './panels/repository-list';
+import RendererContextMenuService from './services/context-menu-service';
+import RendererSystemDialogService from './services/system-dialog-service';
 import { AppDatabase } from './storage/app-database';
 import { AppStore, IAppStore } from './storage/app-store';
 import { injectCssRules } from './style';
 import StyledDockPanel from './styled-dock-panel';
-import RendererSystemDialogService from './system-dialog-service';
 
 const isDevMode = process.execPath.match(/[\\/]electron/);
 

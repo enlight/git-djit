@@ -11,9 +11,9 @@ import * as ReactDOM from 'react-dom';
 
 import FilePathInputView, { FilePathInput } from '../components/file-path-input';
 import { getTopLevelWorkingDirectory } from '../git';
+import RendererSystemDialogService from '../services/system-dialog-service';
 import { IRepositoryStore } from '../storage/repository-store';
 import { IUiStore } from '../storage/ui-store';
-import RendererSystemDialogService from '../system-dialog-service';
 
 interface IAddLocalRepositoryDialogProps {
   model: AddLocalRepositoryDialog;
