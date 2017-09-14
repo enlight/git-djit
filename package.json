@@ -87,7 +87,7 @@
     "electron-forge": "^3.2.0",
     "electron-prebuilt-compile": "1.7.6",
     "mobx-react-devtools": "^4.2.15",
-    "prettier": "1.6.0",
+    "prettier": "1.6.1",
     "tslint": "5.7.0",
     "tslint-config-prettier": "1.4.0",
     "tslint-react": "3.2.0",
