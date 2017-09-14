@@ -1,12 +1,19 @@
 // Copyright (c) 2017 Vadim Macagon
 // MIT License, see LICENSE file for full terms.
 
-import { applySnapshot, types } from 'mobx-state-tree';
+import { applySnapshot, isAlive, types } from 'mobx-state-tree';
 
+import { Omit } from '../../common/typescript-extensions';
 import { IRepositoryModel, RepositoryModel } from './repository-store';
 
+/**
+ * Keys of values stored in localStorage.
+ *
+ * These keys must match the property names in UiStore.
+ */
 enum StorageKey {
-  SelectedRepository = 'selectedRepository'
+  SelectedRepository = '_selectedRepository',
+  PreviouslySelectedRepository = '_previouslySelectedRepository'
 }
 
 /**
@@ -44,21 +51,56 @@ function loadInt(key: StorageKey): number | null {
  */
 export const UiStore = types
   .model('UiStore', {
-    selectedRepository: types.maybe(types.reference(RepositoryModel))
+    /** The currently selected repository (if any) */
+    _selectedRepository: types.maybe(types.reference(RepositoryModel)),
+    /** The previously selected repository (if any) */
+    _previouslySelectedRepository: types.maybe(types.reference(RepositoryModel))
+  })
+  .views(self => {
+    return {
+      /** The currently selected repository, or `null` if none is currently selected. */
+      get selectedRepository(): IRepositoryModel | null {
+        // mobx-state-tree throws exceptions when it fails to resolve a reference to a node
+        // (because the identifier in the snapshot refers to a model that no longer exists),
+        // and when an attempt is made to access a dead node. Since the app can handle the
+        // case where no repository is selected just fine these exceptions should be swallowed.
+        try {
+          const repo = self._selectedRepository;
+          return repo && isAlive(repo) ? repo : null;
+        } catch {
+          // TODO: Log: Previously selected repository not found.
+        }
+        return null;
+      },
+
+      /** The previously selected repository, or `null` if none was previously selected. */
+      get previouslySelectedRepository(): IRepositoryModel | null {
+        try {
+          const repo = self._previouslySelectedRepository;
+          return repo && isAlive(repo) ? repo : null;
+        } catch {
+          // TODO: Log: Previously selected repository not found.
+        }
+        return null;
+      }
+    };
   })
   .actions(self => {
     function afterCreate() {
       const snap: typeof UiStore.SnapshotType = {
-        [StorageKey.SelectedRepository]: loadInt(StorageKey.SelectedRepository)
+        [StorageKey.SelectedRepository]: loadInt(StorageKey.SelectedRepository),
+        [StorageKey.PreviouslySelectedRepository]: loadInt(StorageKey.PreviouslySelectedRepository)
       };
       applySnapshot(self, snap);
     }
 
     function selectRepository(repository: IRepositoryModel | null) {
-      self.selectedRepository = repository;
+      self._previouslySelectedRepository = self._selectedRepository;
+      self._selectedRepository = repository;
+      storeInt(StorageKey.SelectedRepository, repository ? repository.id : null);
       storeInt(
-        StorageKey.SelectedRepository,
-        self.selectedRepository ? self.selectedRepository.id : null
+        StorageKey.PreviouslySelectedRepository,
+        self._previouslySelectedRepository ? self._previouslySelectedRepository.id : null
       );
     }
 
@@ -68,4 +110,7 @@ export const UiStore = types
     };
   });
 
-export type IUiStore = typeof UiStore.Type;
+export type IUiStore = Omit<
+  typeof UiStore.Type,
+  '_selectedRepository' | '_previouslySelectedRepository'
+>;

@@ -8,6 +8,7 @@ import { forceRenderStyles, style } from 'typestyle';
 
 import { IpcChannel } from '../common/ipc';
 import MenuItemId from '../common/menu-item-ids';
+import RendererContextMenuService from './context-menu-service';
 import { showAddLocalRepositoryDialog } from './dialogs/add-local-repository-dialog';
 import { RepositoryListWidget } from './panels/repository-list';
 import { AppDatabase } from './storage/app-database';
@@ -21,6 +22,7 @@ const isDevMode = process.execPath.match(/[\\/]electron/);
 export class AppWindow {
   private appStore: IAppStore;
   private systemDialogService = new RendererSystemDialogService();
+  private contextMenuService = new RendererContextMenuService();
   private rootPanel: SplitPanel | null = null;
 
   constructor() {
@@ -68,7 +70,7 @@ export class AppWindow {
   };
 
   private createDefaultLayout() {
-    const repoList = new RepositoryListWidget(this.appStore);
+    const repoList = new RepositoryListWidget(this.appStore, this.contextMenuService);
     // const historyList = new HistoryListWidget();
     this.rootPanel = new SplitPanel({ orientation: 'horizontal' });
     this.rootPanel.id = 'root';

@@ -4,7 +4,7 @@
 import { process, types } from 'mobx-state-tree';
 
 import { AppDatabase } from './app-database';
-import { RepositoryStore } from './repository-store';
+import { IRepositoryModel, RepositoryStore } from './repository-store';
 import { UiStore } from './ui-store';
 
 export interface IAppStoreEnv {
@@ -30,8 +30,19 @@ export const AppStore = types
       self.ui = UiStore.create();
     }
 
+    async function removeRepository(repository: IRepositoryModel): Promise<void> {
+      const uiStore = self.ui!;
+      if (repository === uiStore.selectedRepository) {
+        uiStore.selectRepository(uiStore.previouslySelectedRepository);
+      }
+      await self.repositories!.removeRepository(repository.id);
+    }
+
     return {
-      load: process<void>(load)
+      /** Populate the store from persistent storage. */
+      load: process<void>(load),
+      /** Remove the given repository and update the current selection if necessary. */
+      removeRepository
     };
   });
 

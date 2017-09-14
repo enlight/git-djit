@@ -29,6 +29,18 @@ export const RepositoryStore = types
   .model('RepositoryStore', {
     repositories: types.optional(types.array(RepositoryModel), [])
   })
+  .views(self => {
+    return {
+      /**
+       * Find a repository matching the given identifier.
+       *
+       * @return A repository, or `null` if no match was found.
+       */
+      findById(repositoryId: number): IRepositoryModel | null {
+        return self.repositories.find(repo => repo.id === repositoryId) || null;
+      }
+    };
+  })
   .actions(self => {
     // mobx-state-tree (as at version 0.11.0) forbids passing in an environment to a child
     // node in the state tree, so because this store will be attached to the AppStore it can't get
@@ -40,6 +52,12 @@ export const RepositoryStore = types
       const id: number = yield db!.repositoryTable.add(repoInfo);
       self.repositories.push(Object.assign({ id }, repoInfo));
       return id;
+    }
+
+    function* removeRepository(repositoryId: number) {
+      yield db!.repositoryTable.delete(repositoryId);
+      const repository = self.repositories.find(repo => repo.id === repositoryId);
+      self.repositories.remove(repository);
     }
 
     function* load() {
@@ -58,6 +76,15 @@ export const RepositoryStore = types
        * @return A promise that will be resolved with the id of the new repository.
        */
       addRepository: process(addRepository) as (repoInfo: INewRepositoryInfo) => Promise<number>,
+      /**
+       * Remove a repository matching the given id from the database.
+       *
+       * This action should only be invoked from the AppStore to ensure the currently selected
+       * repository is updated, @see AppStore.removeRepository.
+       *
+       * @return A promise that will be resolved when the operation completes.
+       */
+      removeRepository: process(removeRepository) as (repositoryId: number) => Promise<void>,
       /**
        * Populate the store from the database.
        *

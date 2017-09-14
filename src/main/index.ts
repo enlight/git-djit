@@ -4,12 +4,14 @@
 import { app, BrowserWindow } from 'electron';
 import { enableLiveReload } from 'electron-compile';
 
+import BrowserContextMenuService from './context-menu-service';
 import setupDevMode from './dev-mode-bootstrap';
 import BrowserSystemDialogService from './system-dialog-service';
 import WindowMenuService from './window-menu-service';
 
 let appWindow: Electron.BrowserWindow | null = null;
 let windowMenuService: WindowMenuService | null = null;
+let contextMenuService: BrowserContextMenuService | null = null;
 let systemDialogService: BrowserSystemDialogService | null = null;
 
 const isDevMode = process.execPath.match(/[\\/]electron/);
@@ -31,6 +33,7 @@ const createWindow = async () => {
 
   appWindow = new BrowserWindow({ width: 800, height: 600, backgroundColor: '#293742' });
   windowMenuService = new WindowMenuService(app.getName());
+  contextMenuService = new BrowserContextMenuService();
   systemDialogService = new BrowserSystemDialogService();
 
   if (isDevMode) {
