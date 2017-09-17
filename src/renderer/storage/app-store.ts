@@ -22,18 +22,36 @@ export const AppStore = types
     ui: types.maybe(UiStore),
     repositories: types.maybe(RepositoryStore)
   })
+  .actions(self => ({
+    /**
+     * Change the currently selected repository.
+     *
+     * @param repository The repository to select, or `null` to deselect the currently selected
+     *                   repository.
+     * @return A promise that will be resolved when the operation is complete. Note that the
+     *         selection will change immediately, but the operation won't be complete until
+     *         the status of the newly selected repository is refreshed.
+     */
+    async selectRepository(repository: IRepositoryModel | null): Promise<void> {
+      self.ui!.selectRepository(repository);
+      if (repository) {
+        await repository.refreshStatus();
+      }
+    }
+  }))
   .actions(self => {
     function* load() {
       self.repositories = RepositoryStore.create();
       yield self.repositories.load();
       // UiStore has references to the RepositoryStore so it must be created last.
       self.ui = UiStore.create();
+      yield self.selectRepository(self.ui.selectedRepository);
     }
 
     async function removeRepository(repository: IRepositoryModel): Promise<void> {
       const uiStore = self.ui!;
       if (repository === uiStore.selectedRepository) {
-        uiStore.selectRepository(uiStore.previouslySelectedRepository);
+        self.selectRepository(uiStore.previouslySelectedRepository);
       }
       await self.repositories!.removeRepository(repository.id);
     }

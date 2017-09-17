@@ -2,10 +2,10 @@
 // Copyright (c) 2017 Vadim Macagon
 // MIT License, see LICENSE file for full terms.
 
+import { RepositoryDoesNotExistErrorCode } from 'dugite';
 import * as path from 'path';
 
-import { RepositoryDoesNotExistErrorCode } from 'dugite';
-import { git } from './core';
+import { git } from '../core';
 
 /**
  * Get the absolute path to the top level working directory of a Git repository.

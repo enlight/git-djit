@@ -95,6 +95,9 @@ export const UiStore = types
     }
 
     function selectRepository(repository: IRepositoryModel | null) {
+      if (self._selectedRepository === repository) {
+        return;
+      }
       self._previouslySelectedRepository = self._selectedRepository;
       self._selectedRepository = repository;
       storeInt(StorageKey.SelectedRepository, repository ? repository.id : null);
@@ -106,6 +109,12 @@ export const UiStore = types
 
     return {
       afterCreate,
+      /**
+       * Select the given repository or deselect the currently selected repository.
+       *
+       * Should only be called directly by the AppStore, use AppStore.selectRepository()
+       * everywhere else.
+       */
       selectRepository
     };
   });

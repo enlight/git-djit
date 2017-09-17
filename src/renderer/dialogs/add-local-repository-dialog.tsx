@@ -12,8 +12,8 @@ import * as ReactDOM from 'react-dom';
 import FilePathInputView, { FilePathInput } from '../components/file-path-input';
 import { getTopLevelWorkingDirectory } from '../git';
 import RendererSystemDialogService from '../services/system-dialog-service';
-import { IRepositoryStore } from '../storage/repository-store';
-import { IUiStore } from '../storage/ui-store';
+import { IAppStore } from '../storage/app-store';
+import { IRepositoryModel } from '../storage/repository-store';
 
 interface IAddLocalRepositoryDialogProps {
   model: AddLocalRepositoryDialog;
@@ -66,8 +66,7 @@ async function validateRepositoryPath(repositoryPath: string): Promise<string | 
 }
 
 export interface IAddLocalRepositoryDialogOptions {
-  repositoryStore: IRepositoryStore;
-  uiStore: IUiStore;
+  appStore: IAppStore;
   systemDialogService: RendererSystemDialogService;
 }
 
@@ -80,13 +79,11 @@ class AddLocalRepositoryDialog {
     return this.repositoryInput.isValid;
   }
 
-  private repositoryStore: IRepositoryStore;
-  private uiStore: IUiStore;
+  private appStore: IAppStore;
 
   constructor(options: IAddLocalRepositoryDialogOptions) {
     this.onOK = this.onOK.bind(this);
-    this.repositoryStore = options.repositoryStore;
-    this.uiStore = options.uiStore;
+    this.appStore = options.appStore;
     this.repositoryInput = new FilePathInput({
       systemDialogService: options.systemDialogService,
       label: 'Local Path',
@@ -109,15 +106,18 @@ class AddLocalRepositoryDialog {
     }
     // If there's already a repository in the store with the same path don't add another one,
     // just select the existing one.
-    let repository = this.repositoryStore.repositories.find(repo => repo.localPath === dirPath);
-    if (!repository) {
-      const id = yield this.repositoryStore.addRepository({
+    const { repositories: repositoryStore } = this.appStore;
+    let repository: IRepositoryModel | null = repositoryStore!.repositories.find(
+      repo => repo.localPath === dirPath
+    );
+    if (!repository && repositoryStore) {
+      const id = yield repositoryStore.addRepository({
         localPath: dirPath,
         name: path.basename(dirPath)
       });
-      repository = this.repositoryStore.repositories.find(repo => repo.id === id);
+      repository = repositoryStore.findById(id);
     }
-    this.uiStore.selectRepository(repository);
+    yield this.appStore.selectRepository(repository);
     this.close();
   }
 

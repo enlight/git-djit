@@ -59,8 +59,7 @@ export class AppWindow {
     switch (menuItemId) {
       case MenuItemId.AddLocalRepository:
         showAddLocalRepositoryDialog({
-          repositoryStore: this.appStore.repositories!,
-          uiStore: this.appStore.ui!,
+          appStore: this.appStore,
           systemDialogService: this.systemDialogService
         });
         break;

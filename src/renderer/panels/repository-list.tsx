@@ -37,6 +37,7 @@ class RepositoryList extends React.Component<IRepositoryListProps> {
     return this.props.repositoryStore.repositories.map<ITypedTreeNode>(repo => ({
       id: repo.id,
       label: repo.name,
+      secondaryLabel: repo.currentBranch ? repo.currentBranch.name : undefined,
       isSelected: this.props.uiStore.selectedRepository === repo,
       nodeType: TreeNodeType.Repository
     }));
@@ -47,7 +48,7 @@ class RepositoryList extends React.Component<IRepositoryListProps> {
       case TreeNodeType.Repository:
         const repository = this.props.repositoryStore.findById(node.id);
         if (repository) {
-          this.props.uiStore.selectRepository(repository);
+          this.props.appStore.selectRepository(repository);
         }
         break;
     }
