@@ -1,7 +1,7 @@
 // Copyright (c) 2017 Vadim Macagon
 // MIT License, see LICENSE file for full terms.
 
-declare module "devtron" {
+declare module 'devtron' {
   /**
    * Install the Devtron DevTools extension.
    *
