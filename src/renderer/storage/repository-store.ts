@@ -5,7 +5,13 @@ import { getEnv, getRoot, process, types } from 'mobx-state-tree';
 
 import { AppDatabase, IRepositoryRecord } from './app-database';
 import { IAppStoreEnv } from './app-store';
-import { GitStore, IBranchModel, isTipBranchValid } from './git-store';
+import {
+  GitStore,
+  IBranchModel,
+  ICommitModel,
+  ILoadNextHistoryBatchOptions,
+  isTipBranchValid
+} from './git-store';
 
 export const RepositoryModel = types
   .model('Repository', {
@@ -23,11 +29,20 @@ export const RepositoryModel = types
         return self.gitStore.tip.branch;
       }
       return null;
+    },
+    get totalHistorySize(): number {
+      return self.gitStore!.totalHistorySize;
+    },
+    get commits(): ICommitModel[] {
+      return self.gitStore!.loadedCommits;
     }
   }))
   .actions(self => ({
     afterCreate: () => (self.gitStore = GitStore.create({ localPath: self.localPath })),
-    refreshStatus: () => self.gitStore!.refreshStatus()
+    refreshStatus: () => self.gitStore!.refreshStatus(),
+    loadHistory: () => self.gitStore!.loadFirstHistoryBatch(),
+    loadMoreHistory: (options?: ILoadNextHistoryBatchOptions) =>
+      self.gitStore!.loadNextHistoryBatch(options)
   }));
 
 export type IRepositoryModel = typeof RepositoryModel.Type;

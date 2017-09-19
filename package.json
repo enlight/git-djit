@@ -61,6 +61,7 @@
   "dependencies": {
     "@blueprintjs/core": "^1.27.0",
     "@phosphor/widgets": "^1.5.0",
+    "@uifabric/utilities": "^4.14.0",
     "dexie": "^2.0.0-beta.11",
     "dugite": "^1.40.0",
     "electron-compile": "^6.4.1",
@@ -72,11 +73,13 @@
     "react-addons-css-transition-group": "^15.6.0",
     "react-dom": "^15.6.1",
     "react-hot-loader": "^3.0.0-beta.7",
+    "react-virtualized": "^9.10.1",
     "tslib": "^1.7.1",
     "typestyle": "^1.4.0"
   },
   "devDependencies": {
     "@types/electron-devtools-installer": "^2.0.2",
+    "@types/prop-types": "^15.5.1",
     "@types/react": "^16.0.5",
     "@types/react-addons-css-transition-group": "^15.0.3",
     "@types/react-dom": "^15.5.4",

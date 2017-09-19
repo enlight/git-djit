@@ -25,13 +25,26 @@ export interface ICommit {
 }
 
 /**
- * Get the repository's commits using `revisionRange` and limited to `limit`
+ * Get commits from the repository at the given path.
+ *
+ * Commits are returned in reverse chronological order by default.
+ *
+ * @localPath Root directory of Git repository.
+ * @revisionRange Range of commits to retrieve, see `git log` docs for accepted formats.
+ * @options.skipCount Number of commits to skip from the start of the revision range before
+ *                    starting to retrieve commits.
+ * @options.maxCount Maximum number of commits to retrieve.
+ * @options.additionalArgs Arguments that should be passed through to the `git log` command.
+ * @return A promise that will be resolved with a list of commits.
  */
 export async function getCommits(
   localPath: string,
   revisionRange: string,
-  limit: number,
-  additionalArgs: ReadonlyArray<string> = []
+  options?: {
+    skipCount?: number;
+    maxCount?: number;
+    additionalArgs?: ReadonlyArray<string>;
+  }
 ): Promise<ICommit[]> {
   const delimiter = '1F';
   const delimiterString = String.fromCharCode(parseInt(delimiter, 16));
@@ -46,21 +59,28 @@ export async function getCommits(
     '%P' // parent SHAs
   ].join(`%x${delimiter}`);
 
-  const result = await git(
-    [
-      'log',
-      revisionRange,
-      `--date=raw`,
-      `--max-count=${limit}`,
-      `--pretty=${prettyFormat}`,
-      '-z',
-      '--no-color',
-      ...additionalArgs
-    ],
-    localPath,
-    'getCommits',
-    { successExitCodes: new Set([0, 128]) }
-  );
+  const gitCmdArgs = [
+    'log',
+    revisionRange,
+    '--date=raw',
+    `--pretty=${prettyFormat}`,
+    '-z',
+    '--no-color'
+  ];
+  if (options) {
+    if (options.skipCount) {
+      gitCmdArgs.push(`--skip=${options.skipCount}`);
+    }
+    if (options.maxCount) {
+      gitCmdArgs.push(`--max-count=${options.maxCount}`);
+    }
+    if (options.additionalArgs && options.additionalArgs.length) {
+      gitCmdArgs.push(...options.additionalArgs);
+    }
+  }
+  const result = await git(gitCmdArgs, localPath, 'getCommits', {
+    successExitCodes: new Set([0, 128])
+  });
 
   // if the repository has an unborn HEAD, return an empty history of commits
   if (result.exitCode === 128) {
@@ -98,7 +118,7 @@ export async function getCommits(
  * @return Commit details, or `null` if no matching commit was found.
  */
 export async function getCommit(localPath: string, ref: string): Promise<ICommit | null> {
-  const commits = await getCommits(localPath, ref, 1);
+  const commits = await getCommits(localPath, ref, { maxCount: 1 });
   return commits.length < 1 ? null : commits[0];
 }
 

@@ -9,6 +9,7 @@ import { forceRenderStyles, style } from 'typestyle';
 import { IpcChannel } from '../common/ipc';
 import MenuItemId from '../common/menu-item-ids';
 import { showAddLocalRepositoryDialog } from './dialogs/add-local-repository-dialog';
+import { HistoryListWidget } from './panels/history-list';
 import { RepositoryListWidget } from './panels/repository-list';
 import RendererContextMenuService from './services/context-menu-service';
 import RendererSystemDialogService from './services/system-dialog-service';
@@ -47,6 +48,11 @@ export class AppWindow {
     this.appStore = AppStore.create({}, { db });
     await this.appStore.load();
     this.createDefaultLayout();
+    const selectedRepository = this.appStore.ui!.selectedRepository;
+    if (selectedRepository) {
+      await selectedRepository.refreshStatus();
+      await selectedRepository.loadHistory();
+    }
   }
 
   private onWindowResize = () => {
@@ -70,7 +76,7 @@ export class AppWindow {
 
   private createDefaultLayout() {
     const repoList = new RepositoryListWidget(this.appStore, this.contextMenuService);
-    // const historyList = new HistoryListWidget();
+    const historyList = new HistoryListWidget(this.appStore);
     this.rootPanel = new SplitPanel({ orientation: 'horizontal' });
     this.rootPanel.id = 'root';
     this.rootPanel.addClass(
@@ -85,7 +91,7 @@ export class AppWindow {
     leftDockPanel.addWidget(repoList);
 
     const rightDockPanel = new StyledDockPanel();
-    // rightDockPanel.addWidget(historyList /*, { mode: 'split-right', ref: repoList }*/);
+    rightDockPanel.addWidget(historyList);
 
     SplitPanel.setStretch(leftDockPanel, 1);
     SplitPanel.setStretch(rightDockPanel, 4);

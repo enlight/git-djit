@@ -3,7 +3,7 @@
 
 import { applySnapshot, getSnapshot, process, types } from 'mobx-state-tree';
 
-import { getCommit, getStatus, ICommit, IStatusResult } from '../git';
+import { getCommit, getCommitCount, getCommits, getStatus, ICommit, IStatusResult } from '../git';
 
 export const CommitModel = types.model('Commit', {
   /** Commit SHA */
@@ -19,6 +19,8 @@ export const CommitModel = types.model('Commit', {
   date: types.Date,
   tzOffset: types.number
 });
+
+export type ICommitModel = typeof CommitModel.Type;
 
 export enum BranchKind {
   Local = 0,
@@ -93,6 +95,18 @@ export function isTipBranchValid(tip: ITipModel | null): tip is IValidBranchRepo
   return !!tip && tip.kind === TipState.Valid;
 }
 
+const HISTORY_BATCH_SIZE = 100;
+
+/** Options that can be passed in to GitStore.loadNextHistoryBatch(). */
+export interface ILoadNextHistoryBatchOptions {
+  /**
+   * If specified the next batch of commits that will be loaded will be large enough to grow the
+   * loaded history to the specified size. This can be useful to ensure that a sufficiently large
+   * range of commits is loaded without having to call loadNextHistoryBatch() over and over again.
+   */
+  minHistorySize?: number;
+}
+
 /** Stores information about the commits and branches of a Git repository. */
 export const GitStore = types
   .model('GitStore', {
@@ -100,15 +114,25 @@ export const GitStore = types
     localPath: types.string,
     branches: types.optional(types.array(BranchModel), () => []),
     isStatusLoaded: false,
-    isStatusLoading: false,
-    tip: types.optional(TipModel, () => TipModel.create({ kind: TipState.Unknown }))
+    tip: types.optional(TipModel, () => TipModel.create({ kind: TipState.Unknown })),
+    /** Maps commit id to commit model. */
+    commitMap: types.optional(types.map(CommitModel), () => ({})),
+    /** All the currently loaded commits, the most recent commit will be the first item in the list. */
+    loadedCommits: types.optional(types.array(CommitModel), () => []),
+    /** Total number of commits that can be loaded from the Git repository. */
+    totalHistorySize: types.optional(types.number, () => 0)
   })
   .actions(self => {
+    let isStatusLoading = false;
+    let isFirstHistoryBatchLoading = false;
+    let isNextHistoryBatchLoading = false;
+    let minRequestedHistorySize = 0;
+
     function* refreshStatus() {
-      if (self.isStatusLoading) {
+      if (isStatusLoading) {
         return;
       }
-      self.isStatusLoading = true;
+      isStatusLoading = true;
 
       try {
         const status: IStatusResult = yield getStatus(self.localPath);
@@ -153,15 +177,128 @@ export const GitStore = types
         } else {
           self.tip = TipModel.create({ kind: TipState.Unknown });
         }
-      } catch {
+      } catch (e) {
         self.isStatusLoaded = false;
+        throw e;
       } finally {
-        self.isStatusLoading = false;
+        isStatusLoading = false;
+      }
+    }
+
+    function createSnapshotFromCommit(commit: ICommit) {
+      return {
+        id: commit.sha,
+        summary: commit.summary,
+        body: commit.body,
+        parentIds: commit.parentSHAs,
+        authorName: commit.author.name,
+        authorEmail: commit.author.email,
+        date: commit.author.date,
+        tzOffset: commit.author.tzOffset
+      };
+    }
+
+    function* loadFirstHistoryBatch() {
+      if (isFirstHistoryBatchLoading) {
+        return;
+      }
+      isFirstHistoryBatchLoading = true;
+      try {
+        self.totalHistorySize = yield getCommitCount(self.localPath);
+        // Load commits in reverse chronological order.
+        const commits: ICommit[] = yield getCommits(self.localPath, 'HEAD', {
+          maxCount: HISTORY_BATCH_SIZE
+        });
+        const shaSnapshotPairs = commits.map(
+          c => [c.sha, createSnapshotFromCommit(c)] as [string, ICommitModel]
+        );
+        self.commitMap.replace(shaSnapshotPairs);
+        self.loadedCommits.replace(shaSnapshotPairs.map(([_, snapshot]) => snapshot));
+      } catch (e) {
+        // TODO: log
+        throw e;
+      } finally {
+        isFirstHistoryBatchLoading = false;
+      }
+      if (self.loadedCommits.length < minRequestedHistorySize) {
+        yield* loadNextHistoryBatch();
+      } else {
+        minRequestedHistorySize = 0;
+      }
+    }
+
+    function* loadNextHistoryBatch(options?: ILoadNextHistoryBatchOptions): any {
+      if (self.totalHistorySize <= self.loadedCommits.length) {
+        // nothing to do, everything has already been loaded or will be soon
+        return;
+      }
+      if (options && options.minHistorySize) {
+        minRequestedHistorySize = Math.max(minRequestedHistorySize, options.minHistorySize);
+        if (self.loadedCommits.length >= minRequestedHistorySize) {
+          return;
+        }
+      }
+      if (isFirstHistoryBatchLoading || isNextHistoryBatchLoading) {
+        return;
+      }
+
+      let minCommitsToLoad;
+      if (minRequestedHistorySize === 0) {
+        minCommitsToLoad = HISTORY_BATCH_SIZE;
+      } else {
+        minCommitsToLoad = minRequestedHistorySize - self.loadedCommits.length;
+      }
+      let batchSize = HISTORY_BATCH_SIZE;
+      if (minCommitsToLoad > batchSize) {
+        batchSize = (Math.floor(minCommitsToLoad / HISTORY_BATCH_SIZE) + 1) * HISTORY_BATCH_SIZE;
+      } else if (minCommitsToLoad <= 0) {
+        return;
+      }
+
+      isNextHistoryBatchLoading = true;
+      // minRequestedHistorySize may be modified while the current batch is loaded,
+      // store the current value so that we can check if the full batch was loaded or not.
+      const initialRequestedHistorySize = minRequestedHistorySize;
+      try {
+        const lastLoadedCommitIdx = self.loadedCommits.length - 1;
+        const lastLoadedCommitId = self.loadedCommits[lastLoadedCommitIdx].id;
+        console.log(
+          `Loading up to ${batchSize} commits after ${lastLoadedCommitId} at index ${lastLoadedCommitIdx}`
+        );
+        const commits: ICommit[] = yield getCommits(self.localPath, 'HEAD', {
+          skipCount: lastLoadedCommitIdx + 1,
+          maxCount: batchSize
+        });
+        const shaSnapshotPairs = commits.map(
+          c => [c.sha, createSnapshotFromCommit(c)] as [string, ICommitModel]
+        );
+        self.commitMap.merge(shaSnapshotPairs);
+        self.loadedCommits.push(...shaSnapshotPairs.map(([_, snapshot]) => snapshot));
+        console.log(`Loaded commits [${lastLoadedCommitIdx + 1},${self.loadedCommits.length - 1}]`);
+      } catch (e) {
+        // TODO: log
+        throw e;
+      } finally {
+        isNextHistoryBatchLoading = false;
+      }
+
+      const shouldLoadNextBatch =
+        self.loadedCommits.length >= initialRequestedHistorySize &&
+        self.loadedCommits.length < minRequestedHistorySize;
+
+      if (shouldLoadNextBatch) {
+        yield* loadNextHistoryBatch();
+      } else {
+        minRequestedHistorySize = 0;
       }
     }
 
     return {
-      refreshStatus: process<void>(refreshStatus)
+      refreshStatus: process<void>(refreshStatus),
+      loadFirstHistoryBatch: process<void>(loadFirstHistoryBatch),
+      loadNextHistoryBatch: process(loadNextHistoryBatch) as (
+        options?: ILoadNextHistoryBatchOptions
+      ) => Promise<void>
     };
   });
 

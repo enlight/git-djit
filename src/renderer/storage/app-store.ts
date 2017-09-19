@@ -22,6 +22,11 @@ export const AppStore = types
     ui: types.maybe(UiStore),
     repositories: types.maybe(RepositoryStore)
   })
+  .views(self => ({
+    get selectedRepository(): IRepositoryModel | null {
+      return self.ui ? self.ui.selectedRepository : null;
+    }
+  }))
   .actions(self => ({
     /**
      * Change the currently selected repository.
@@ -36,6 +41,7 @@ export const AppStore = types
       self.ui!.selectRepository(repository);
       if (repository) {
         await repository.refreshStatus();
+        await repository.loadHistory();
       }
     }
   }))
@@ -45,7 +51,6 @@ export const AppStore = types
       yield self.repositories.load();
       // UiStore has references to the RepositoryStore so it must be created last.
       self.ui = UiStore.create();
-      yield self.selectRepository(self.ui.selectedRepository);
     }
 
     async function removeRepository(repository: IRepositoryModel): Promise<void> {
