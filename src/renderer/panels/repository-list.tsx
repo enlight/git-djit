@@ -5,6 +5,7 @@ import { Classes as BlueprintClasses, ITreeNode, Tree } from '@blueprintjs/core'
 import { computed } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import { style } from 'typestyle';
 
 import { ContextMenu } from '../context-menu';
 import ReactWidget from '../react-widget';
@@ -32,6 +33,11 @@ export interface IRepositoryListProps {
 
 @observer
 class RepositoryList extends React.Component<IRepositoryListProps> {
+  private _cssClass = style({
+    flex: '1 1 auto',
+    overflow: 'auto'
+  });
+
   @computed
   get items(): ITypedTreeNode[] {
     return this.props.repositoryStore.repositories.map<ITypedTreeNode>(repo => ({
@@ -72,6 +78,7 @@ class RepositoryList extends React.Component<IRepositoryListProps> {
   render() {
     return (
       <Tree
+        className={this._cssClass}
         contents={this.items}
         onNodeClick={this.onClick}
         onNodeContextMenu={this.onContextMenu}

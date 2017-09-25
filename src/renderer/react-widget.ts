@@ -10,28 +10,22 @@ import { style } from 'typestyle';
 import { AppContainer } from './react-hot-loader';
 import { appBackgroundColor } from './style';
 
-const cssClass = style({
-  backgroundColor: appBackgroundColor,
-  display: 'flex',
-  flexDirection: 'column',
-  minHeight: '50px',
-  minWidth: '50px',
-  padding: '4px',
-  $nest: {
-    '&>div': {
-      flex: '1 1 auto',
-      overflow: 'auto'
-    }
-  }
-});
-
 /**
  * PhosphorJS widget that wraps a React component.
  */
 export default class ReactWidget<TProps = {}> extends Widget {
+  private _cssClass = style({
+    backgroundColor: appBackgroundColor,
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: '50px',
+    minWidth: '50px',
+    padding: '4px'
+  });
+
   constructor(private component: React.ComponentClass<TProps>, private props?: TProps) {
     super();
-    this.addClass(cssClass);
+    this.addClass(this._cssClass);
   }
 
   protected onAfterAttach(_: Message): void {

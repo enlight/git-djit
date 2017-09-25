@@ -5,7 +5,6 @@ import { Classes as BlueprintClasses } from '@blueprintjs/core';
 import { autobind } from '@uifabric/utilities';
 import { observer } from 'mobx-react';
 import * as React from 'react';
-// import { style } from 'typestyle';
 import {
   AutoSizer,
   Column as VirtualizedTableColumn,
@@ -13,6 +12,7 @@ import {
   Table as VirtualizedTable,
   TableCellProps as ITableCellProps
 } from 'react-virtualized';
+import { style } from 'typestyle';
 
 import ReactWidget from '../react-widget';
 import { IAppStore } from '../storage/app-store';
@@ -47,27 +47,26 @@ const DateCell = observer((props: ICellProps) => {
 
 @observer
 class HistoryList extends React.Component<IHistoryListProps> {
-  /*
-  private rootClass = style({
-    // flex: '1 1 auto',
-    // display: 'flex',
-    // flexDirection: 'column',
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
+  private _cssClass = style({
+    flex: '1 1 auto',
+    overflow: 'auto'
   });
-*/
+
   render() {
     const repository = this.props.appStore.selectedRepository;
     return (
-      <AutoSizer
-        // repositoryName, historySize, and loadedHistorySize aren't actually AutoSizer props but
-        // AutoSizer won't rerender the table unless a prop changes.
-        repositoryName={repository!.name}
-        historySize={repository!.totalHistorySize}
-        loadedHistorySize={repository!.commits.length}>
-        {this._renderTable}
-      </AutoSizer>
+      // AutoSizer seems to add a sibling DOM node, so wrap it in div to keep everything
+      // nicely contained.
+      <div className={this._cssClass}>
+        <AutoSizer
+          // repositoryName, historySize, and loadedHistorySize aren't actually AutoSizer props but
+          // AutoSizer won't rerender the table unless a prop changes.
+          repositoryName={repository!.name}
+          historySize={repository!.totalHistorySize}
+          loadedHistorySize={repository!.commits.length}>
+          {this._renderTable}
+        </AutoSizer>
+      </div>
     );
   }
 
