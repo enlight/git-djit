@@ -22,6 +22,7 @@
     "files": [
         "main/devtron.d.ts",
         "main/index.ts",
+        "renderer/resize-observer.d.ts",
         "renderer/index.ts"
     ]
 }

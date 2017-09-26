@@ -31,7 +31,12 @@ const createWindow = async () => {
     await bootstrapDevMode();
   }
 
-  appWindow = new BrowserWindow({ width: 800, height: 600, backgroundColor: '#293742' });
+  appWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    backgroundColor: '#293742',
+    webPreferences: { blinkFeatures: 'ResizeObserver' }
+  });
   windowMenuService = new WindowMenuService(app.getName());
   contextMenuService = new BrowserContextMenuService();
   systemDialogService = new BrowserSystemDialogService();
