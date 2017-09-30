@@ -96,6 +96,11 @@ export class RepositoryListWidget extends ReactWidget<IRepositoryListProps> {
       contextMenuService
     });
     this.addClass(BlueprintClasses.TAB_PANEL);
+    // BlueprintClasses.TAB_PANEL will add a top margin that's going to throw off whatever
+    // computations Phosphor does to absolutely position this widget, as a result content
+    // gets cut off at the bottom of the panel. To work around this mess replace the margin with
+    // padding.
+    this.addClass(style({ marginTop: 0, paddingTop: 20 }));
     this.node.setAttribute('role', 'tabpanel');
     this.id = 'repoList';
     this.title.label = 'Repositories';
