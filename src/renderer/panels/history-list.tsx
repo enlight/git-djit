@@ -19,6 +19,7 @@ import { style } from 'typestyle';
 import ReactWidget from '../react-widget';
 import { IAppStore } from '../storage/app-store';
 import { ICommitModel } from '../storage/git-store';
+import { tableStyle } from '../style';
 
 export interface IHistoryListProps {
   appStore: IAppStore;
@@ -71,14 +72,26 @@ const DateCell = observer((props: ICellProps) => {
 class HistoryList extends React.Component<IHistoryListProps> {
   private _tableContainerStyle = style({
     flex: '1 1 auto',
-    overflow: 'auto'
+    overflow: 'auto',
+    backgroundColor: tableStyle.backgroundColor,
+    boxShadow: `0 0 0 ${tableStyle.tableBorderWidth} ${tableStyle.tableBorderColor}`
   });
 
   private _columnHeaderStyle = style({
     // ditch the margins to make it easier to compute resize handle positions
     margin: '0 !important',
     paddingLeft: 5,
-    paddingRight: 5
+    paddingRight: 5,
+    backgroundColor: tableStyle.headerBackgroundColor,
+    boxShadow: [
+      `inset -${tableStyle.tableBorderWidth} 0 0 ${tableStyle.tableBorderColor}`,
+      `inset 0 -${tableStyle.tableBorderWidth} 0 ${tableStyle.tableBorderColor}`
+    ].join(','),
+    $nest: {
+      '&:hover': {
+        backgroundColor: tableStyle.headerHoverBackgroundColor
+      }
+    }
   });
 
   private _outerCellStyle = style({
@@ -95,7 +108,7 @@ class HistoryList extends React.Component<IHistoryListProps> {
 
   private _tableOverlayStyle = style({
     position: 'absolute',
-    top: 0,
+    top: 20, // account for 20px padding of the tab panel
     bottom: 0,
     left: 0,
     right: 0,
@@ -103,7 +116,7 @@ class HistoryList extends React.Component<IHistoryListProps> {
     pointerEvents: 'none'
   });
 
-  private _resizeHandleCssClass = style({
+  private _resizeHandleStyle = style({
     backgroundColor: 'transparent',
     position: 'absolute',
     top: 0,
@@ -121,7 +134,7 @@ class HistoryList extends React.Component<IHistoryListProps> {
       },
       '&.react-draggable-dragging': {
         cursor: 'ew-resize',
-        backgroundColor: 'white'
+        backgroundColor: tableStyle.resizeHandleColor
       }
     }
   });
@@ -157,7 +170,7 @@ class HistoryList extends React.Component<IHistoryListProps> {
           axis="x"
           position={{ x: columns[i].resizeHandleX, y: 0 }}
           onStop={resize}>
-          <div className={this._resizeHandleCssClass} />
+          <div className={this._resizeHandleStyle} />
         </Draggable>
       );
     }
@@ -243,7 +256,9 @@ class HistoryList extends React.Component<IHistoryListProps> {
           headerRowRenderer={this._rendererHeaderRow}>
           {this.renderedColumns}
         </VirtualizedTable>
-        <div className={this._tableOverlayStyle}>{this.renderedResizeHandles}</div>
+        <div className={this._tableOverlayStyle} aria-hidden={true}>
+          {this.renderedResizeHandles}
+        </div>
       </div>
     );
   }
