@@ -58,11 +58,26 @@ const AuthorCell = observer((props: ICellProps) => {
   return null;
 });
 
+const commitDateTimeFormat = new Intl.DateTimeFormat(undefined, {
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false
+});
+
+function formatDate(dateFormat: Intl.DateTimeFormat, date: Date): string {
+  return dateFormat.format(date).replace(/,/g, ' ');
+}
+
 const DateCell = observer((props: ICellProps) => {
   const isLoaded = props.rowIndex < props.commits.length;
   if (isLoaded) {
     return (
-      <div className={props.className}>{props.commits[props.rowIndex].date.toLocaleString()}</div>
+      <div className={props.className}>
+        {formatDate(commitDateTimeFormat, props.commits[props.rowIndex].date)}
+      </div>
     );
   }
   return null;
